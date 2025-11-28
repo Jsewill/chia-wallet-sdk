@@ -199,6 +199,12 @@ impl Clawback {
     }
 }
 
+impl ToTreeHash for Clawback {
+    fn tree_hash(&self) -> TreeHash {
+        self.to_layer().tree_hash()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::slice;
