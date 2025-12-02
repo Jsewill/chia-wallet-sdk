@@ -91,7 +91,7 @@ impl Clawback {
             }
         }
         for &clawback in &metadatas {
-            if puzhashes.contains(&clawback.to_layer().tree_hash().to_bytes()) {
+            if puzhashes.contains(&clawback.tree_hash().to_bytes()) {
                 outputs.push(clawback);
             }
         }
@@ -236,7 +236,7 @@ mod tests {
             sender_puzzle_hash: alice.puzzle_hash,
             receiver_puzzle_hash: bob.puzzle_hash,
         };
-        let clawback_puzzle_hash = clawback.to_layer().tree_hash().into();
+        let clawback_puzzle_hash = clawback.tree_hash().into();
         let coin = alice.coin;
         let conditions = Conditions::new()
             .create_coin(clawback_puzzle_hash, 1, Memos::None)
@@ -306,7 +306,7 @@ mod tests {
             sender_puzzle_hash: alice.puzzle_hash,
             receiver_puzzle_hash: Bytes32::default(),
         };
-        let clawback_puzzle_hash = clawback.to_layer().tree_hash().into();
+        let clawback_puzzle_hash = clawback.tree_hash().into();
 
         alice_p2.spend(
             ctx,
