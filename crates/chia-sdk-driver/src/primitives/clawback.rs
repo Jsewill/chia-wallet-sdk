@@ -139,6 +139,11 @@ impl Clawback {
         ])
     }
 
+    // Alias of to_layer(), to make handling between V1 and V2 more consistent.
+    pub fn into_1_of_n(&self) -> P2OneOfManyLayer {
+        self.to_layer()
+    }
+
     pub fn to_layer(&self) -> P2OneOfManyLayer {
         P2OneOfManyLayer::new(self.merkle_tree().root())
     }
