@@ -1,17 +1,17 @@
 use chia_protocol::{Bytes32, Coin};
 use chia_puzzle_types::{
+    LineageProof, Proof,
     nft::{NftOwnershipLayerSolution, NftStateLayerSolution},
     offer::{NotarizedPayment, SettlementPaymentsSolution},
     singleton::SingletonSolution,
-    LineageProof, Proof,
 };
 use chia_puzzles::SETTLEMENT_PAYMENT_HASH;
 use chia_sdk_types::{
-    conditions::{TradePrice, TransferNft},
     Conditions,
+    conditions::{TradePrice, TransferNft},
 };
 use chia_sha2::Sha256;
-use clvm_traits::{clvm_list, ToClvm};
+use clvm_traits::{ToClvm, clvm_list};
 use clvm_utils::tree_hash;
 use clvmr::{Allocator, NodePtr};
 
@@ -476,7 +476,26 @@ mod tests {
             .mint_nft(ctx, &mint)?;
         let _did = did.update(ctx, &alice_p2, mint_nft)?;
 
-        let metadata_update = MetadataUpdate::NewDataUri("another.com".to_string()).spend(ctx)?;
+        let metadata_update = MetadataUpdate {
+            kind: UriKind::Data,
+            uri: "another.com".to_string(),
+        }
+        .spend(ctx)?;
+
+        let mismatched_updater = ctx.alloc(&())?;
+        let error = run_metadata_updater(
+            ctx,
+            &nft.info.metadata,
+            nft.info.metadata_updater_puzzle_hash,
+            mismatched_updater,
+            metadata_update.solution,
+        )
+        .expect_err("metadata updater puzzle hash should not match");
+        assert!(matches!(
+            error,
+            DriverError::MetadataUpdaterPuzzleHashMismatch
+        ));
+
         let parent_nft = nft;
         let nft = nft.transfer_with_metadata(
             ctx,

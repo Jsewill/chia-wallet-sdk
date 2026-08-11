@@ -3,13 +3,14 @@ use crate::{
 };
 use chia_protocol::{Bytes32, Coin};
 use chia_puzzle_types::{
-    cat::{CatArgs, CatSolution},
     CoinProof, LineageProof, Memos,
+    cat::{CatArgs, CatSolution},
 };
 use chia_puzzles::CAT_PUZZLE_HASH;
 use chia_sdk_types::{
+    Conditions, Mod,
     puzzles::{P2ParentArgs, P2ParentSolution},
-    run_puzzle, Conditions, Mod,
+    run_puzzle,
 };
 use clvm_traits::{FromClvm, ToClvm};
 use clvm_utils::{ToTreeHash, TreeHash};
@@ -217,9 +218,10 @@ mod tests {
         ];
 
         let (expected_coin, expected_asset_id, expected_lp) = if cat_mode {
-            let (issue_cat, cats) = Cat::issue_with_coin(
+            let (issue_cat, cats) = Cat::single_issuance(
                 &mut ctx,
                 parent_bls.coin.coin_id(),
+                None,
                 parent_bls.coin.amount,
                 Conditions::new().create_coin(
                     parent_bls.puzzle_hash,

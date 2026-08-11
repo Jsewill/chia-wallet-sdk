@@ -1,17 +1,14 @@
 use chia_protocol::Bytes32;
 use chia_puzzle_types::nft::{NftOwnershipLayerArgs, NftStateLayerArgs};
 use chia_puzzles::NFT_STATE_LAYER_HASH;
-use chia_sdk_types::{
-    conditions::{CreateCoin, NewMetadataOutput},
-    run_puzzle, Condition, Mod,
-};
-use clvm_traits::{clvm_list, FromClvm, ToClvm};
+use chia_sdk_types::{Condition, Mod, conditions::CreateCoin, run_puzzle};
+use clvm_traits::FromClvm;
 use clvm_utils::{ToTreeHash, TreeHash};
 use clvmr::{Allocator, NodePtr};
 
 use crate::{
     DriverError, HashedPtr, Layer, NftOwnershipLayer, NftStateLayer, Puzzle, RoyaltyTransferLayer,
-    SingletonInfo, SingletonLayer, Spend,
+    SingletonInfo, SingletonLayer, Spend, run_metadata_updater,
 };
 
 pub type StandardNftLayers<M, I> =
@@ -192,23 +189,15 @@ impl NftInfo {
         }
 
         if let Some(new_metadata) = new_metadata {
-            let metadata_updater_solution = clvm_list!(
+            let metadata_info = run_metadata_updater(
+                allocator,
                 &self.metadata,
                 self.metadata_updater_puzzle_hash,
-                new_metadata.updater_solution
-            )
-            .to_clvm(allocator)?;
-
-            let output = run_puzzle(
-                allocator,
                 new_metadata.updater_puzzle_reveal,
-                metadata_updater_solution,
+                new_metadata.updater_solution,
             )?;
-
-            let output = NewMetadataOutput::<HashedPtr, NodePtr>::from_clvm(allocator, output)?
-                .metadata_info;
-            info.metadata = output.new_metadata;
-            info.metadata_updater_puzzle_hash = output.new_updater_puzzle_hash;
+            info.metadata = metadata_info.new_metadata;
+            info.metadata_updater_puzzle_hash = metadata_info.new_updater_puzzle_hash;
         }
 
         info.p2_puzzle_hash = create_coin.puzzle_hash;
@@ -246,7 +235,8 @@ impl SingletonInfo for NftInfo {
 mod tests {
     use chia_puzzle_types::nft::NftMetadata;
     use chia_sdk_test::Simulator;
-    use chia_sdk_types::{conditions::TransferNft, Conditions};
+    use chia_sdk_types::{Conditions, conditions::TransferNft};
+    use clvm_traits::ToClvm;
 
     use crate::{
         IntermediateLauncher, Launcher, NftMint, SingletonInfo, SpendContext, StandardLayer,

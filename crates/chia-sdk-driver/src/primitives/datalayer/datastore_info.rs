@@ -4,11 +4,11 @@ use crate::{
 use chia_protocol::{Bytes, Bytes32};
 use chia_puzzle_types::nft::NftStateLayerArgs;
 use chia_sdk_types::{
-    puzzles::{
-        DelegationLayerArgs, WriterLayerArgs, DELEGATION_LAYER_PUZZLE_HASH,
-        DL_METADATA_UPDATER_PUZZLE_HASH,
-    },
     MerkleTree,
+    puzzles::{
+        DELEGATION_LAYER_PUZZLE_HASH, DL_METADATA_UPDATER_PUZZLE_HASH, DelegationLayerArgs,
+        WriterLayerArgs,
+    },
 };
 use clvm_traits::{ClvmDecoder, ClvmEncoder, FromClvm, FromClvmError, Raw, ToClvm, ToClvmError};
 use clvm_utils::{CurriedProgram, ToTreeHash, TreeHash};
@@ -77,8 +77,8 @@ impl DelegatedPuzzle {
 
                 // puzzle hash bech32m_decode(oracle_address), not puzzle hash of the whole oracle puzze!
                 let oracle_fee: u64 = BigInt::from_signed_bytes_be(&remaining_memos.remove(0))
-                    .to_u64_digits()
-                    .1[0];
+                    .try_into()
+                    .map_err(|_| DriverError::InvalidMemo)?;
 
                 Ok(DelegatedPuzzle::Oracle(puzzle_hash.into(), oracle_fee))
             }

@@ -1,6 +1,6 @@
 use chia_sdk_types::{
-    puzzles::{IndexWrapperArgs, INDEX_WRAPPER_HASH},
     Mod,
+    puzzles::{INDEX_WRAPPER_HASH, IndexWrapperArgs},
 };
 use clvm_traits::{FromClvm, MatchByte};
 use clvm_utils::{ToTreeHash, TreeHash};
@@ -45,7 +45,7 @@ where
         let args = IndexWrapperArgs::<NodePtr, NodePtr>::from_clvm(allocator, puzzle.args)?;
 
         if BulletinNonce::from_clvm(allocator, args.nonce).is_err() {
-            return Err(DriverError::InvalidModHash);
+            return Ok(None);
         }
 
         let Some(inner_puzzle) =
