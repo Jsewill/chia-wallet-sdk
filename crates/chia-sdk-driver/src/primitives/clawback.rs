@@ -314,7 +314,7 @@ mod tests {
 
     #[test]
     #[allow(clippy::similar_names)]
-    fn test_clawback_coin_claim() -> anyhow::Result<()> {
+    fn test_clawback_v1_parse_and_claim() -> anyhow::Result<()> {
         let mut sim = Simulator::new();
         let ctx = &mut SpendContext::new();
 
@@ -377,7 +377,7 @@ mod tests {
 
     #[test]
     #[allow(clippy::similar_names)]
-    fn test_clawback_claim_coin_spend_helper() -> anyhow::Result<()> {
+    fn test_clawback_v1_claim() -> anyhow::Result<()> {
         let mut sim = Simulator::new();
         let ctx = &mut SpendContext::new();
 
@@ -432,7 +432,7 @@ mod tests {
 
     #[test]
     #[allow(clippy::similar_names)]
-    fn test_clawback_coin_clawback() -> anyhow::Result<()> {
+    fn test_clawback_v1_sender_spend() -> anyhow::Result<()> {
         let mut sim = Simulator::new();
         let ctx = &mut SpendContext::new();
 
@@ -466,7 +466,7 @@ mod tests {
 
     #[test]
     #[allow(clippy::similar_names)]
-    fn test_clawback_clawback_coin_spend_helper() -> anyhow::Result<()> {
+    fn test_clawback_v1_clawback() -> anyhow::Result<()> {
         let mut sim = Simulator::new();
         let ctx = &mut SpendContext::new();
 
